@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crear usuario</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+  <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card shadow-lg p-4" style="width: 100%; max-width: 600px;">
+      <h3 class="text-center mb-4">Crear usuario</h3>
+      <form id="loginForm">
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="email">Correo<span style="color: red; font-weight: bold;"> *</span></label>
+            <input type="email" id="email" class="form-control" placeholder="Correo" required>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="password">Contraseña<span style="color: red; font-weight: bold;"> *</span></label>
+            <input type="password" id="password" class="form-control" placeholder="Contraseña" required>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="name">Nombre y apellidos<span style="color: red; font-weight: bold;"> *</span></label>
+            <input type="text" id="name" class="form-control" placeholder="Nombre y apellidos" required>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="enterprise_name">Nombre de la empresa</label> <!-- SIN * rojo -->
+            <input type="text" id="enterprise_name" class="form-control" placeholder="Nombre de la empresa">
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="profession">Profesión<span style="color: red; font-weight: bold;"> *</span></label>
+            <input type="text" id="profession" class="form-control" placeholder="Profesión" required>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="phone">Teléfono<span style="color: red; font-weight: bold;"> *</span></label>
+            <input type="text" id="phone" class="form-control" placeholder="Teléfono" required>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="zip_code">Código postal<span style="color: red; font-weight: bold;"> *</span></label>
+            <input type="number" id="zip_code" class="form-control" placeholder="Código postal" required>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="subscription">Rol<span style="color: red; font-weight: bold;"> *</span></label>
+            <select id="subscription" class="form-control" required>
+              <option value="user">Usuario</option>
+              <option value="admin">Administrador</option>
+              <option value="guest">Invitado</option>
+            </select>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-block">Crear usuario</button>
+        <br>
+        <a href="login" class="btn btn-secondary btn-block" style="text-decoration: none;">Volver al inicio de sesión</a>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const name = document.getElementById('name').value;
+      const enterprise_name = document.getElementById('enterprise_name').value;
+      const profession = document.getElementById('profession').value;
+      const phone = document.getElementById('phone').value;
+      const zip_code = document.getElementById('zip_code').value;
+      const subscription = document.getElementById('subscription').value;
+      
+      fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+          name: name,
+          enterprise_name: enterprise_name,
+          profession: profession,
+          phone: phone,
+          zip_code: zip_code,
+          subscription: subscription
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          alert(data.error);
+        } else {
+          alert('Bienvenido ' + data.name);
+          window.location.href = "login";
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Hubo un problema al intentar crear un usuario.');
+      });
+    });
+  </script>
+</body>
+</html>
