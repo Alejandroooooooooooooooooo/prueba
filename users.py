@@ -17,10 +17,17 @@ class Users(models.Model):
     phone = fields.Char(string='Número de Telefono', required=True)
 
     subscription = fields.Selection([
-        ('nombreVariable', 'descripcion'),
+        ('Partner', 'Partner'),
+        ('Lover', 'Lover'),
+        ('Corner', 'Corner'),
+        ('Franquicia', 'Franquicia'),
+
     ], string='Tipo de Suscripción', required=True)
 
     zip_code = fields.Char(string='Código Postal')
+
+    reset_token = fields.Char(string='Token de Restablecimiento', copy=False)
+    reset_token_expiration = fields.Datetime(string='Expiración del Token', copy=False)
 
     @api.model
     def create(self, vals):
