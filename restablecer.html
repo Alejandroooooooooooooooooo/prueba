@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear usuario</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+  <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card shadow-lg p-4" style="width: 100%; max-width: 600px;">
+      <h3 class="text-center mb-4">Restablecer contraseña</h3>
+      <form id="changePasswordForm">
+        <div class="form-group">
+          <label for="email">Correo</label>
+          <input type="email" id="email" class="form-control" placeholder="Correo para restablecer la contraseña" required>
+        </div>
+        <div class="form-group">
+          <label for="new_password">Nueva contraseña</label>
+          <input type="password" id="new_password" class="form-control" placeholder="Nueva contraseña" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Enviar</button>
+      </form><br>
+      <a href="login" class="btn btn-secondary btn-block text-decoration-none">Volver al inicio de sesión</a>
+    </div>
+  </div>
+    <script>
+      document.getElementById('changePasswordForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const new_password = document.getElementById('new_password').value;
+      
+      fetch('/api/change_password', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email,
+          new_password: new_password
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Error en la respuesta del servidor');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.error) {
+          alert(data.error);
+        } else {
+          alert(data.message);
+          window.location.href = "login";
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Hubo un problema al intentar restablecer la contraseña.');
+      });
+    });
+      </script>
+</body>
+</html>
