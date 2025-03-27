@@ -98,12 +98,10 @@ class UsersAPI(http.Controller):
                     return self.error_response(f"Faltan datos obligatorios: {',' .join(missing_fields)}")
                 
 
-                hashed_password = pwd_context.hash(data['password'])
-
                 user = request.env['users'].sudo().create({
                     'profession': data['profession'],
                     'email': data['email'],
-                    'password': hashed_password,
+                    'password': data['password'],
                     'name': data['name'],
                     'enterprise_name': data.get('enterprise_name', None),
                     'phone': data['phone'],
