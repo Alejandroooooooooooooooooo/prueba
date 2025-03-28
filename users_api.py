@@ -49,17 +49,24 @@ class UsersAPI(http.Controller):
 
     @staticmethod
     def validate_password(password):
+        errors = []
+
         if len(password) < 8:
-            return False, "La contraseña debe tener al menos 8 caracteres."
+            errors.append("La contraseña debe tener al menos 8 caracteres.")
         if not re.search(r'[A-Z]', password):
-            return False, "La contraseña debe contener al menos una letra mayúscula."
+            errors.append("La contraseña debe contener al menos una letra mayúscula.")
         if not re.search(r'[a-z]', password):
-            return False, "La contraseña debe contener al menos una letra minúscula."
+            errors.append("La contraseña debe contener al menos una letra minúscula.")
         if not re.search(r'[0-9]', password):
-            return False, "La contraseña debe contener al menos un número."
+            errors.append("La contraseña debe contener al menos un número.")
         if not re.search(r'[!@#$%^&*(),.?":{}|<>-_+\[\]=;\'\\]', password):
-            return False, "La contraseña debe contener al menos un carácter especial."
+            errors.append("La contraseña debe contener al menos un carácter especial.")
+
+    # Si hay errores, los devolvemos; si no, es válida
+        if errors:
+            return False, errors
         return True, ""
+
 
 
     # Endpoint para login
@@ -158,8 +165,10 @@ class UsersAPI(http.Controller):
                 if not self.validate_zip_code(data['zip_code']):
                     return self.error_response("El código postal debe ser un número válido con 5 dígitos.")
 
-
-
+                is_valid, error_message = UsersAPI.validate_password(data['password'])
+                if not is_valid:
+                    return self.error_response(f"Error en la contraseña: {error_message}")
+                
                 user = request.env['users'].sudo().create({
                     'profession': data['profession'],
                     'email': data['email'],
