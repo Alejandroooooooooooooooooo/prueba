@@ -30,7 +30,7 @@ class UsersAPI(http.Controller):
             return False, "La contraseña debe contener al menos una letra minúscula."
         if not re.search(r'[0-9]', password):
             return False, "La contraseña debe contener al menos un número."
-        if not re.search(r'[!@#$%^&*(),.?\":{}|<>]', password):
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>-_+\[\]=;\'\\]', password):
             return False, "La contraseña debe contener al menos un carácter especial."
         return True, ""
 
@@ -244,8 +244,8 @@ class UsersAPI(http.Controller):
         body = f"""
         Hola,
 
-        Hemos recibido una solicitud para restablecer tu contraseña.
-        Haga clic en el siguiente enlace para cambiar tu contraseña:
+        Hemos recibido una solicitud para restablecer su contraseña.
+        Haga clic en el siguiente enlace para cambiar su contraseña:
 
         {reset_link}
 
@@ -254,7 +254,8 @@ class UsersAPI(http.Controller):
         Si usted no realizó esta solicitud, ignore este correo.
 
         Saludos,
-        NOMBRE_EQUIPO
+
+        Estudios Mi Arquitecto S.L
         """
         msg = MIMEMultipart()
         msg['From'] = from_email
