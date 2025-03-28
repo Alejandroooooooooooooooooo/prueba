@@ -141,6 +141,9 @@ class UsersAPI(http.Controller):
                 if missing_fields:
                     return self.error_response(f"Faltan datos obligatorios: {','.join(missing_fields)}")
 
+                if not data.get('terms_accepted', False):
+                    return self.error_response("Debe aceptar los términos y condiciones para continuar.")
+                
                 # Errores de validación
                 errors = {}
 
@@ -226,8 +229,6 @@ class UsersAPI(http.Controller):
                 return self.add_cors_headers(response)
 
             # Validar la nueva contraseña
-            
-# Validar la nueva contraseña
             password_errors = UsersAPI.validate_password(new_password)
             if password_errors:
                 response = Response(json.dumps({'error': password_errors}),

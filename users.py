@@ -29,6 +29,8 @@ class Users(models.Model):
     reset_token = fields.Char(string='Token de Restablecimiento', copy=False)
     reset_token_expiration = fields.Datetime(string='Expiración del Token', copy=False)
 
+    terms_accepted = fields.Boolean(string="¿Acepta los términos y condiciones?", required=True, default=False)
+
     @api.model
     def create(self, vals):
         if vals.get('password'):
