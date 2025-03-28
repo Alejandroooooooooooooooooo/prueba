@@ -75,28 +75,27 @@ class UsersAPI(http.Controller):
                     return self.error_response(f"Faltan datos obligatorios: {','.join(missing_fields)}")
 
                 # Errores de validación
-                errors = []
+                errors = {}
 
-                # Validación de los campos
                 if not UsersAPI.validate_email(data['email']):
-                    errors.append("El correo electrónico no es válido.")
+                    errors['email'] = "El correo electrónico no es válido."
                 if not UsersAPI.validate_name_and_surname(data['name']):
-                    errors.append("El nombre debe tener al menos 5 caracteres y contener solo letras y espacios.")
+                    errors['name'] = "El nombre debe tener al menos 5 caracteres y contener solo letras y espacios."
                 if not UsersAPI.validate_phone(data['phone']):
-                    errors.append("El número de teléfono debe contener al menos 9 dígitos.")
+                    errors['phone'] = "El número de teléfono debe contener al menos 9 dígitos."
                 if not UsersAPI.validate_zip_code(data['zip_code']):
-                    errors.append("El código postal debe contener exactamente 5 dígitos.")
+                    errors['zip_code'] = "El código postal debe contener exactamente 5 dígitos."
                 if data.get('profession') and not UsersAPI.validate_profession(data['profession']):
-                    errors.append("La profesión debe tener al menos 5 caracteres y contener solo letras y espacios.")
-                
+                    errors['profession'] = "La profesión debe tener al menos 5 caracteres y contener solo letras y espacios."
                 # Validación de la contraseña
                 password_errors = UsersAPI.validate_password(data['password'])
                 if password_errors:
-                    errors.extend(password_errors)
+                    errors['password'] = password_errors
+
 
                 # Si hay errores, los devolvemos
                 if errors:
-                    return self.error_response(f"Errores: {', '.join(errors)}")
+                    return json.dumps({'error': errors})
 
                 # Creación del usuario
                 user = request.env['users'].sudo().create({
@@ -135,3 +134,58 @@ class UsersAPI(http.Controller):
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
         return response
+    
+        # Rutas para servir páginas HTML
+    @http.route('/login', auth='public', type='http')
+    def login_page(self):
+        ruta_html = os.path.join(os.path.dirname(__file__), '../static/src/html/login.html')
+        try:
+            with open(ruta_html, 'r', encoding='utf-8') as file:
+                contenido = file.read()
+            return Response(contenido, content_type='text/html')
+        except FileNotFoundError:
+            return Response("Archivo no encontrado", status=404)
+        
+
+    @http.route('/index', auth='public', type='http')
+    def index_page(self):
+        ruta_html = os.path.join(os.path.dirname(__file__), '../static/src/html/index.html')
+        try:
+            with open(ruta_html, 'r', encoding='utf-8') as file:
+                contenido = file.read()
+            return Response(contenido, content_type='text/html')
+        except FileNotFoundError:
+            return Response("Archivo no encontrado", status=404)
+
+
+    @http.route('/users', auth='public', type='http')
+    def createuser_page(self):
+        ruta_html = os.path.join(os.path.dirname(__file__), '../static/src/html/Crear_Usuario.html')
+        try:
+            with open(ruta_html, 'r', encoding='utf-8') as file:
+                contenido = file.read()
+            return Response(contenido, content_type='text/html')
+        except FileNotFoundError:
+            return Response("Archivo no encontrado", status=404)
+
+
+    @http.route('/restore', auth='public', type='http')
+    def restablecer_page(self):
+        ruta_html = os.path.join(os.path.dirname(__file__), '../static/src/html/restablecer.html')
+        try:
+            with open(ruta_html, 'r', encoding='utf-8') as file:
+                contenido = file.read()
+            return Response(contenido, content_type='text/html')
+        except FileNotFoundError:
+            return Response("Archivo no encontrado", status=404)
+
+
+    @http.route('/reset-password', auth='public', type='http')
+    def restablecer_contraseña_page(self):
+        ruta_html = os.path.join(os.path.dirname(__file__), '../static/src/html/restablecer_password.html')
+        try:
+            with open(ruta_html, 'r', encoding='utf-8') as file:
+                contenido = file.read()
+            return Response(contenido, content_type='text/html')
+        except FileNotFoundError:
+            return Response("Archivo no encontrado", status=404)
