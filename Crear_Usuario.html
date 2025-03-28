@@ -9,8 +9,9 @@
 </head>
 <body class="bg-light">
   <!-- Contenedor para alertas de Bootstrap, centrado en pantalla -->
-  <div id="alertPlaceholder" class="position-fixed d-flex justify-content-center align-items-center" style="top:20px; left:50%; transform: translateX(-50%); z-index:1050;"></div>
-  
+  <div id="alertPlaceholder" class="position-fixed d-flex justify-content-center align-items-center"
+    style="top:20px; left:50%; transform: translateX(-50%); z-index:1050;"></div>
+
   <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
     <div class="card shadow-lg p-4" style="width: 100%; max-width: 600px;">
       <h3 class="text-center mb-4">Crear usuario</h3>
@@ -27,7 +28,7 @@
             <small id="passwordError" class="form-text text-danger" style="display: none;"></small>
           </div>
         </div>
-        
+
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="name">Nombre y apellidos<span style="color: red; font-weight: bold;"> *</span></label>
@@ -40,7 +41,7 @@
             <small id="enterprise_nameError" class="form-text text-danger" style="display: none;"></small>
           </div>
         </div>
-        
+
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="profession">Profesión<span style="color: red; font-weight: bold;"> *</span></label>
@@ -53,7 +54,7 @@
             <small id="phoneError" class="form-text text-danger" style="display: none;"></small>
           </div>
         </div>
-        
+
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="zip_code">Código postal<span style="color: red; font-weight: bold;"> *</span></label>
@@ -72,7 +73,18 @@
             <small id="subscriptionError" class="form-text text-danger" style="display: none;"></small>
           </div>
         </div>
-        
+
+        <!-- Checkbox de aceptación de términos -->
+        <div class="form-group">
+          <div class="form-check">
+            <input type="checkbox" id="terms_accepted" class="form-check-input">
+            <label class="form-check-label" for="terms_accepted">
+              He leído y <a href="PrivacyPolicy_TermsOfService">acepto la política de tratamiento de datos</a> y las condiciones del servicio para el tratamiento de mis datos personales.
+            </label>
+          </div>
+          <small id="terms_acceptedError" class="form-text text-danger" style="display: none;"></small>
+        </div>
+
         <button type="submit" class="btn btn-primary btn-block">Crear usuario</button>
         <br>
         <a href="login" class="btn btn-secondary btn-block" style="text-decoration: none;">Volver al inicio de sesión</a>
@@ -81,15 +93,15 @@
   </div>
 
   <script>
-        // Función para mostrar una alerta de Bootstrap centrada
-        function showAlert(message, type = "danger") {
-          const alertPlaceholder = document.getElementById("alertPlaceholder");
-    
-          // Eliminar cualquier alerta existente antes de mostrar una nueva
-          alertPlaceholder.innerHTML = '';
-    
-          const wrapper = document.createElement("div");
-          wrapper.innerHTML = `
+    // Función para mostrar una alerta de Bootstrap centrada
+    function showAlert(message, type = "danger") {
+      const alertPlaceholder = document.getElementById("alertPlaceholder");
+
+      // Eliminar cualquier alerta existente antes de mostrar una nueva
+      alertPlaceholder.innerHTML = '';
+
+      const wrapper = document.createElement("div");
+      wrapper.innerHTML = `
             <div class="alert alert-${type} alert-dismissible fade show" role="alert">
               ${message}
               <button type="button" class="close" data-dismiss="alert" aria-label="Cerrar">
@@ -97,20 +109,18 @@
               </button>
             </div>
           `;
-          alertPlaceholder.append(wrapper);
-          
-          // Opcional: quitar la alerta después de 5 segundos
-          setTimeout(() => {
-            wrapper.remove();
-          }, 5000);
-        }
+      alertPlaceholder.append(wrapper);
 
+      // Opcional: quitar la alerta después de 5 segundos
+      setTimeout(() => {
+        wrapper.remove();
+      }, 5000);
+    }
 
-
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
       e.preventDefault();
-      
-      // Limpiar los mensajes de error previos
+
+      // Lista de campos obligatorios
       const fields = [
         { id: 'email', name: 'Correo' },
         { id: 'password', name: 'Contraseña' },
@@ -120,15 +130,14 @@
         { id: 'zip_code', name: 'Código postal' },
         { id: 'subscription', name: 'Rol' }
       ];
-      
+
       let hasError = false;
 
-      
       // Recorremos los campos para validarlos
-      fields.forEach(function(field) {
+      fields.forEach(function (field) {
         const value = document.getElementById(field.id).value.trim();
         const errorElement = document.getElementById(field.id + 'Error');
-        
+
         if (value === "" || (field.id === "subscription" && value === "")) {
           errorElement.textContent = `${field.name} es obligatorio.`;
           errorElement.style.display = 'block';
@@ -138,11 +147,22 @@
         }
       });
 
+      // Validar el checkbox de términos (valor booleano)
+      const termsAccepted = document.getElementById('terms_accepted');
+      const termsAcceptedError = document.getElementById('terms_acceptedError');
+      if (!termsAccepted.checked) {
+        termsAcceptedError.textContent = "Debes aceptar los términos y condiciones para continuar.";
+        termsAcceptedError.style.display = 'block';
+        hasError = true;
+      } else {
+        termsAcceptedError.style.display = 'none';
+      }
+
       if (hasError) {
         return; // No enviar el formulario si hay errores
       }
 
-      // Si no hay errores, enviar la solicitud al servidor
+      // Enviar la solicitud al servidor, incluyendo el valor booleano del checkbox
       fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -154,34 +174,32 @@
           profession: document.getElementById('profession').value.trim(),
           phone: document.getElementById('phone').value.trim(),
           zip_code: document.getElementById('zip_code').value.trim(),
-          subscription: document.getElementById('subscription').value
+          subscription: document.getElementById('subscription').value,
+          terms_accepted: termsAccepted.checked
         })
       })
       .then(response => response.json())
       .then(data => {
         if (data.error) {
-  // Limpiar errores anteriores primero
-  fields.forEach(field => {
-    const errorEl = document.getElementById(field.id + 'Error');
-    errorEl.textContent = "";
-    errorEl.style.display = "none";
-  });
+          // Limpiar errores anteriores primero
+          fields.forEach(field => {
+            const errorEl = document.getElementById(field.id + 'Error');
+            errorEl.textContent = "";
+            errorEl.style.display = "none";
+          });
 
-  // Recorremos los errores devueltos por el backend
-  Object.entries(data.error).forEach(([campo, errores]) => {
-    const errorElement = document.getElementById(campo + 'Error');
+          // Recorremos los errores devueltos por el backend
+          Object.entries(data.error).forEach(([campo, errores]) => {
+            const errorElement = document.getElementById(campo + 'Error');
 
-    if (errorElement) {
-      const mensaje = Array.isArray(errores) ? errores.join(' ') : errores;
-      errorElement.textContent = mensaje;
-      errorElement.style.display = 'block';
-      showAlert(mensaje, "danger");
-    }
-  });
-
-
-        }
-        else {
+            if (errorElement) {
+              const mensaje = Array.isArray(errores) ? errores.join(' ') : errores;
+              errorElement.textContent = mensaje;
+              errorElement.style.display = 'block';
+              showAlert(mensaje, "danger");
+            }
+          });
+        } else {
           alert('Bienvenido ' + data.name);
           window.location.href = "login";
         }
@@ -192,7 +210,7 @@
       });
     });
   </script>
-  
+
   <!-- Bootstrap JS y dependencias (jQuery y Popper.js) -->
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
