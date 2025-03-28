@@ -20,6 +20,33 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class UsersAPI(http.Controller):
 
+
+    @staticmethod
+    def validate_email(email):
+        # Expresión regular para validar correo electrónico
+        return re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email) is not None
+
+    @staticmethod
+    def validate_name_and_surname(name):
+        # Validar que solo contenga letras y espacios y que tenga al menos 5 caracteres
+        return bool(re.match(r"^[a-zA-Z\s]+$", name)) and len(name) >= 5
+
+    @staticmethod
+    def validate_profession(profession):
+        # Validar que solo contenga letras y espacios y que tenga al menos 5 caracteres
+        return bool(re.match(r"^[a-zA-Z\s]+$", profession)) and len(profession) >= 5
+
+    @staticmethod
+    def validate_phone(phone):
+        # Validar que sea un número y que tenga al menos 9 dígitos
+        return phone.isdigit() and len(phone) >= 9
+
+    @staticmethod
+    def validate_zip_code(zip_code):
+        # Validar que sea un número y que tenga 5 dígitos
+        return zip_code.isdigit() and len(zip_code) == 5
+
+
     @staticmethod
     def validate_password(password):
         if len(password) < 8:
@@ -115,6 +142,24 @@ class UsersAPI(http.Controller):
                 if missing_fields:
                     return self.error_response(f"Faltan datos obligatorios: {','.join(missing_fields)}")
                 
+                # Validaciones de los campos
+                if not self.validate_email(data['email']):
+                    return self.error_response("El correo electrónico no tiene un formato válido.")
+                
+                if not self.validate_name_and_surname(data['name']):
+                    return self.error_response("El nombre y apellidos deben contener al menos 5 caracteres y solo letras y espacios.")
+                
+                if not self.validate_profession(data['profession']):
+                    return self.error_response("La profesión debe contener al menos 5 caracteres y solo letras y espacios.")
+                
+                if not self.validate_phone(data['phone']):
+                    return self.error_response("El teléfono debe ser un número válido con al menos 9 dígitos.")
+                
+                if not self.validate_zip_code(data['zip_code']):
+                    return self.error_response("El código postal debe ser un número válido con 5 dígitos.")
+
+
+
                 user = request.env['users'].sudo().create({
                     'profession': data['profession'],
                     'email': data['email'],
