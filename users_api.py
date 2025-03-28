@@ -62,12 +62,7 @@ class UsersAPI(http.Controller):
         if not re.search(r'[!@#$%^&*(),.?":{}|<>-_+\[\]=;\'\\]', password):
             errors.append("La contraseña debe contener al menos un carácter especial.")
 
-    # Si hay errores, los devolvemos; si no, es válida
-        if errors:
-            return False, errors
-        return True, ""
-
-
+            return errors
 
     # Endpoint para login
     @http.route('/api/login', type='http', auth='public', methods=['POST', 'OPTIONS'], csrf=False)
@@ -149,25 +144,23 @@ class UsersAPI(http.Controller):
                 if missing_fields:
                     return self.error_response(f"Faltan datos obligatorios: {','.join(missing_fields)}")
                 
-                # Validaciones de los campos
-                if not self.validate_email(data['email']):
-                    return self.error_response("El correo electrónico no tiene un formato válido.")
-                
-                if not self.validate_name_and_surname(data['name']):
-                    return self.error_response("El nombre y apellidos deben contener al menos 5 caracteres y solo letras y espacios.")
-                
-                if not self.validate_profession(data['profession']):
-                    return self.error_response("La profesión debe contener al menos 5 caracteres y solo letras y espacios.")
-                
-                if not self.validate_phone(data['phone']):
-                    return self.error_response("El teléfono debe ser un número válido con al menos 9 dígitos.")
-                
-                if not self.validate_zip_code(data['zip_code']):
-                    return self.error_response("El código postal debe ser un número válido con 5 dígitos.")
+
+                errors = []
+
+            # Validación de cada campo por separado
+                errors.extend(UsersAPI.validate_email(data['email']))
+                errors.extend(UsersAPI.validate_name_and_surname(data['name']))
+                errors.extend(UsersAPI.validate_phone(data['phone']))
+                errors.extend(UsersAPI.validate_zip_code(data['zip_code']))
+            
+            # Si hay errores, los devolvemos
+                if errors:
+                    return self.error_response(f"Errores: {', '.join(errors)}")
 
                 is_valid, error_message = UsersAPI.validate_password(data['password'])
                 if not is_valid:
                     return self.error_response(f"Error en la contraseña: {error_message}")
+                
                 
                 user = request.env['users'].sudo().create({
                     'profession': data['profession'],
