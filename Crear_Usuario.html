@@ -8,6 +8,9 @@
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body class="bg-light">
+  <!-- Contenedor para alertas de Bootstrap, centrado en pantalla -->
+  <div id="alertPlaceholder" class="position-fixed d-flex justify-content-center align-items-center" style="top:20px; left:50%; transform: translateX(-50%); z-index:1050;"></div>
+  
   <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
     <div class="card shadow-lg p-4" style="width: 100%; max-width: 600px;">
       <h3 class="text-center mb-4">Crear usuario</h3>
@@ -16,10 +19,12 @@
           <div class="form-group col-md-6">
             <label for="email">Correo<span style="color: red; font-weight: bold;"> *</span></label>
             <input type="email" id="email" class="form-control" placeholder="Correo" required>
+            <small id="emailError" class="form-text text-danger" style="display: none;"></small>
           </div>
           <div class="form-group col-md-6">
             <label for="password">Contraseña<span style="color: red; font-weight: bold;"> *</span></label>
             <input type="password" id="password" class="form-control" placeholder="Contraseña" required>
+            <small id="passwordError" class="form-text text-danger" style="display: none;"></small>
           </div>
         </div>
         
@@ -27,10 +32,12 @@
           <div class="form-group col-md-6">
             <label for="name">Nombre y apellidos<span style="color: red; font-weight: bold;"> *</span></label>
             <input type="text" id="name" class="form-control" placeholder="Nombre y apellidos" required>
+            <small id="nameError" class="form-text text-danger" style="display: none;"></small>
           </div>
           <div class="form-group col-md-6">
-            <label for="enterprise_name">Nombre de la empresa</label> <!-- SIN * rojo -->
+            <label for="enterprise_name">Nombre de la empresa</label>
             <input type="text" id="enterprise_name" class="form-control" placeholder="Nombre de la empresa">
+            <small id="enterprise_nameError" class="form-text text-danger" style="display: none;"></small>
           </div>
         </div>
         
@@ -38,10 +45,12 @@
           <div class="form-group col-md-6">
             <label for="profession">Profesión<span style="color: red; font-weight: bold;"> *</span></label>
             <input type="text" id="profession" class="form-control" placeholder="Profesión" required>
+            <small id="professionError" class="form-text text-danger" style="display: none;"></small>
           </div>
           <div class="form-group col-md-6">
             <label for="phone">Teléfono<span style="color: red; font-weight: bold;"> *</span></label>
             <input type="text" id="phone" class="form-control" placeholder="Teléfono" required>
+            <small id="phoneError" class="form-text text-danger" style="display: none;"></small>
           </div>
         </div>
         
@@ -49,15 +58,18 @@
           <div class="form-group col-md-6">
             <label for="zip_code">Código postal<span style="color: red; font-weight: bold;"> *</span></label>
             <input type="number" id="zip_code" class="form-control" placeholder="Código postal" required>
+            <small id="zip_codeError" class="form-text text-danger" style="display: none;"></small>
           </div>
           <div class="form-group col-md-6">
             <label for="subscription">Rol<span style="color: red; font-weight: bold;"> *</span></label>
             <select id="subscription" class="form-control" required>
+              <option value="">Seleccione...</option>
               <option value="Partner">Partner</option>
               <option value="Lover">Lover</option>
               <option value="Corner">Corner</option>
               <option value="Franquicia">Franquicia</option>
             </select>
+            <small id="subscriptionError" class="form-text text-danger" style="display: none;"></small>
           </div>
         </div>
         
@@ -69,36 +81,121 @@
   </div>
 
   <script>
+        // Función para mostrar una alerta de Bootstrap centrada
+        function showAlert(message, type = "danger") {
+          const alertPlaceholder = document.getElementById("alertPlaceholder");
+    
+          // Eliminar cualquier alerta existente antes de mostrar una nueva
+          alertPlaceholder.innerHTML = '';
+    
+          const wrapper = document.createElement("div");
+          wrapper.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+              ${message}
+              <button type="button" class="close" data-dismiss="alert" aria-label="Cerrar">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+          `;
+          alertPlaceholder.append(wrapper);
+          
+          // Opcional: quitar la alerta después de 5 segundos
+          setTimeout(() => {
+            wrapper.remove();
+          }, 5000);
+        }
+
+
+
     document.getElementById('loginForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const name = document.getElementById('name').value;
-      const enterprise_name = document.getElementById('enterprise_name').value;
-      const profession = document.getElementById('profession').value;
-      const phone = document.getElementById('phone').value;
-      const zip_code = document.getElementById('zip_code').value;
-      const subscription = document.getElementById('subscription').value;
       
+      // Limpiar los mensajes de error previos
+      const fields = [
+        { id: 'email', name: 'Correo' },
+        { id: 'password', name: 'Contraseña' },
+        { id: 'name', name: 'Nombre y apellidos' },
+        { id: 'profession', name: 'Profesión' },
+        { id: 'phone', name: 'Teléfono' },
+        { id: 'zip_code', name: 'Código postal' },
+        { id: 'subscription', name: 'Rol' }
+      ];
+      
+      let hasError = false;
+
+      
+      // Recorremos los campos para validarlos
+      fields.forEach(function(field) {
+        const value = document.getElementById(field.id).value.trim();
+        const errorElement = document.getElementById(field.id + 'Error');
+        
+        if (value === "" || (field.id === "subscription" && value === "")) {
+          errorElement.textContent = `${field.name} es obligatorio.`;
+          errorElement.style.display = 'block';
+          hasError = true;
+        } else {
+          errorElement.style.display = 'none';
+        }
+      });
+
+      if (hasError) {
+        return; // No enviar el formulario si hay errores
+      }
+
+      // Si no hay errores, enviar la solicitud al servidor
       fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: email,
-          password: password,
-          name: name,
-          enterprise_name: enterprise_name,
-          profession: profession,
-          phone: phone,
-          zip_code: zip_code,
-          subscription: subscription
+          email: document.getElementById('email').value.trim(),
+          password: document.getElementById('password').value.trim(),
+          name: document.getElementById('name').value.trim(),
+          enterprise_name: document.getElementById('enterprise_name').value.trim(),
+          profession: document.getElementById('profession').value.trim(),
+          phone: document.getElementById('phone').value.trim(),
+          zip_code: document.getElementById('zip_code').value.trim(),
+          subscription: document.getElementById('subscription').value
         })
       })
       .then(response => response.json())
       .then(data => {
         if (data.error) {
-          alert(data.error);
-        } else {
+          switch (true) {
+            case data.error.includes('correo'):
+              showAlert("El correo electrónico no tiene un formato válido.", "danger");
+              document.getElementById('emailError').textContent = "El correo electrónico no tiene un formato válido.";
+              document.getElementById('emailError').style.display = 'block';
+
+            case data.error.includes('contraseña'):
+              showAlert("La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una minúscula, un número y un carácter especial.", "danger");
+              document.getElementById('passwordError').textContent = "La contraseña debe tener al menos 8 caracteres, una letra mayúscula, una minúscula, un número y un carácter especial.";
+              document.getElementById('passwordError').style.display = 'block';
+
+          
+            case data.error.includes('nombre'):
+              showAlert("El nombre y apellidos deben contener al menos 5 caracteres y solo letras y espacios.", "danger");
+              document.getElementById('nameError').textContent = "El nombre y apellidos deben contener al menos 5 caracteres y solo letras y espacios.";
+              document.getElementById('nameError').style.display = 'block';
+
+          
+            case data.error.includes('profesión'):
+              showAlert("La profesión debe contener al menos 5 caracteres y solo letras y espacios.", "danger");
+              document.getElementById('professionError').textContent = "La profesión debe contener al menos 5 caracteres y solo letras y espacios.";
+              document.getElementById('professionError').style.display = 'block';
+
+            case data.error.includes('teléfono'):
+              showAlert("El teléfono debe ser un número válido con al menos 9 dígitos.", "danger");
+              document.getElementById('phoneError').textContent = "El teléfono debe ser un número válido con al menos 9 dígitos.";
+              document.getElementById('phoneError').style.display = 'block';
+          
+            case data.error.includes('postal'):
+              showAlert("El código postal debe ser un número válido con 5 dígitos.", "danger");
+              document.getElementById('zip_codeError').textContent = "El código postal debe ser un número válido con 5 dígitos.";
+              document.getElementById('zip_codeError').style.display = 'block';
+              break;
+          }
+        }
+        else {
           alert('Bienvenido ' + data.name);
           window.location.href = "login";
         }
@@ -109,5 +206,10 @@
       });
     });
   </script>
+  
+  <!-- Bootstrap JS y dependencias (jQuery y Popper.js) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
