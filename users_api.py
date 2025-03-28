@@ -255,7 +255,7 @@ class UsersAPI(http.Controller):
 
         Saludos,
 
-        Estudios Mi Arquitecto S.L
+        Estudios Mi Arquitecto SL
         """
         msg = MIMEMultipart()
         msg['From'] = from_email
